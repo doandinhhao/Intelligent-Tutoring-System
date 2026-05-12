@@ -1,0 +1,23 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: irms-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: irms
+      POSTGRES_USER: irms_user
+      POSTGRES_PASSWORD: irms_pass
+      TZ: Asia/Bangkok
+    ports:
+      - "55432:5432"
+    volumes:
+      - irms_pg_data:/var/lib/postgresql/data
+      - ./backend/database/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U irms_user -d irms"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  irms_pg_data:

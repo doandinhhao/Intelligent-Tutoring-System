@@ -1,0 +1,14 @@
+{
+  "name": "irms-main-flow",
+  "private": true,
+  "scripts": {
+    "db:up": "docker compose up -d postgres",
+    "db:down": "docker compose down",
+    "db:logs": "docker compose logs -f postgres",
+    "dev": "pnpm -r --parallel --filter irms-backend --filter frontend dev",
+    "dev:backend": "pnpm --filter irms-backend dev",
+    "dev:frontend": "pnpm --filter frontend dev",
+    "reset:db": "pnpm --filter irms-backend db:reset",
+    "build": "pnpm -r --filter frontend build"
+  }
+}

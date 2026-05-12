@@ -1,0 +1,8 @@
+node_modules
+.pnpm-store
+backend/node_modules
+frontend/node_modules
+backend/.env
+frontend/.env
+srs_extracted.txt
+erd_text.txt
