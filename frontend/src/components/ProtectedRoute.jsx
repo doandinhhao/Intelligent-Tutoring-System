@@ -2,12 +2,12 @@ import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 const roleRouteMap = {
-  chef: "/kitchen",
-  manager: "/manager",
-  admin: "/manager",
-  cashier: "/manager",
-  waiter: "/waiter",
-  host: "/manager",
+  chef: "/kitchen/queue",
+  manager: "/manager/billing",
+  admin: "/manager/billing",
+  cashier: "/cashier/checkout",
+  waiter: "/waiter/tables",
+  host: "/manager/billing",
 };
 
 export const ProtectedRoute = ({ roles, children }) => {
@@ -27,7 +27,7 @@ export const ProtectedRoute = ({ roles, children }) => {
   }
 
   if (roles && !roles.includes(user.role_key)) {
-    return <Navigate to={roleRouteMap[user.role_key] || "/waiter"} replace />;
+    return <Navigate to={roleRouteMap[user.role_key] || "/waiter/tables"} replace />;
   }
 
   return children;

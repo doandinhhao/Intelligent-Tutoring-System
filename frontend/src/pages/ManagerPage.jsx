@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { NavLink } from "react-router-dom";
 import { adminApi, billingApi, tablesApi } from "../api/irmsApi";
 import { useAuth } from "../context/AuthContext";
 
@@ -67,10 +68,13 @@ const defaultNewMenuItem = {
   base_price: 0,
 };
 
-export const ManagerPage = () => {
+export const ManagerPage = ({ view = "all" }) => {
   const { user } = useAuth();
   const canUseAdminTools = ["manager", "admin"].includes(user?.role_key);
-  const canManageSensitiveBilling = ["manager", "admin", "cashier"].includes(user?.role_key);
+  const isCashierView = user?.role_key === "cashier";
+  const billingBasePath = isCashierView ? "/cashier/checkout" : "/manager/billing";
+  const canManageSensitiveBilling = ["manager", "admin"].includes(user?.role_key);
+  const canAdjustBill = ["manager", "admin", "cashier"].includes(user?.role_key);
 
   const [tables, setTables] = useState([]);
   const [selectedTableId, setSelectedTableId] = useState(null);
@@ -109,6 +113,8 @@ export const ManagerPage = () => {
   const [error, setError] = useState("");
   const [info, setInfo] = useState("");
   const [nowMs, setNowMs] = useState(0);
+  const showBilling = view !== "admin";
+  const showAdmin = view !== "billing";
 
   const selectedTable = useMemo(
     () => tables.find((table) => table.table_id === selectedTableId) || null,
@@ -126,6 +132,8 @@ export const ManagerPage = () => {
       tables.filter((table) => table.active_session?.session_status_key === "awaiting_payment"),
     [tables],
   );
+  const tablesForBillingView =
+    isCashierView && awaitingPaymentTables.length > 0 ? awaitingPaymentTables : tables;
 
   const loadBillForSession = async (sessionId) => {
     if (!sessionId) {
@@ -158,7 +166,13 @@ export const ManagerPage = () => {
       setPromotions(promoData || []);
       setAuditLogs(logData || []);
 
-      const nextTableId = selectedTableId || tableData?.[0]?.table_id || null;
+      const preferredTableId = isCashierView
+        ? tableData.find((table) => table.active_session?.session_status_key === "awaiting_payment")
+            ?.table_id ||
+          tableData?.[0]?.table_id ||
+          null
+        : tableData?.[0]?.table_id || null;
+      const nextTableId = selectedTableId || preferredTableId;
       setSelectedTableId(nextTableId);
 
       const selectedTableFromData = tableData?.find((table) => table.table_id === nextTableId);
@@ -488,15 +502,35 @@ export const ManagerPage = () => {
     );
   }
 
+  const visiblePanelCount =
+    (showBilling ? 1 : 0) + (showAdmin && canUseAdminTools ? 1 : 0);
+  const managerLayoutClass =
+    visiblePanelCount <= 1 ? "manager-grid manager-grid-lite" : "manager-grid";
+
   return (
-    <main className={`manager-grid ${canUseAdminTools ? "" : "manager-grid-lite"}`}>
-      <section className="panel manager-billing">
+    <main className={managerLayoutClass}>
+      {showBilling ? (
+        <section className="panel manager-billing">
         <div className="panel-header">
-          <h2>Billing and Settlement</h2>
-          <button type="button" className="ghost-btn" onClick={bootstrap}>
-            Refresh
-          </button>
+          <h2>{isCashierView ? "Cashier Checkout" : "Billing and Settlement"}</h2>
+          <div className="manager-actions">
+            {!isCashierView ? (
+              <nav className="role-nav">
+                <NavLink to={billingBasePath}>Billing</NavLink>
+                {canUseAdminTools ? <NavLink to="/manager/admin">Admin tools</NavLink> : null}
+              </nav>
+            ) : null}
+            <button type="button" className="ghost-btn" onClick={bootstrap}>
+              Refresh
+            </button>
+          </div>
         </div>
+
+        {isCashierView ? (
+          <p className="muted">
+            Cashier view is optimized for payment queue: open bill, collect payment, and print receipt.
+          </p>
+        ) : null}
 
         <div className="admin-block">
           <h3>Tables Waiting for Payment</h3>
@@ -520,7 +554,7 @@ export const ManagerPage = () => {
         </div>
 
         <div className="table-grid">
-          {tables.map((table) => (
+          {tablesForBillingView.map((table) => (
             <button
               key={table.table_id}
               type="button"
@@ -560,94 +594,100 @@ export const ManagerPage = () => {
         </div>
 
         <div className="manager-form-grid">
-          <label>
-            Promo code
-            <input
-              value={billForm.promotion_code}
-              onChange={(event) =>
-                setBillForm((prev) => ({ ...prev, promotion_code: event.target.value }))
-              }
-              placeholder="HAPPY10"
-            />
-          </label>
-          <label>
-            Manual discount
-            <input
-              type="number"
-              min={0}
-              value={billForm.manual_discount_amount}
-              onChange={(event) =>
-                setBillForm((prev) => ({
-                  ...prev,
-                  manual_discount_amount: Math.max(0, Number(event.target.value) || 0),
-                }))
-              }
-            />
-          </label>
-          <label>
-            Service rate %
-            <input
-              type="number"
-              min={0}
-              max={50}
-              value={billForm.service_charge_rate}
-              onChange={(event) =>
-                setBillForm((prev) => ({
-                  ...prev,
-                  service_charge_rate: Math.max(0, Number(event.target.value) || 0),
-                }))
-              }
-            />
-          </label>
-          <label>
-            Tax rate %
-            <input
-              type="number"
-              min={0}
-              max={50}
-              value={billForm.tax_rate}
-              onChange={(event) =>
-                setBillForm((prev) => ({
-                  ...prev,
-                  tax_rate: Math.max(0, Number(event.target.value) || 0),
-                }))
-              }
-            />
-          </label>
-          <label>
-            Tip
-            <input
-              type="number"
-              min={0}
-              value={billForm.tip_amount}
-              onChange={(event) =>
-                setBillForm((prev) => ({ ...prev, tip_amount: Math.max(0, Number(event.target.value) || 0) }))
-              }
-            />
-          </label>
-          <label>
-            Split count
-            <input
-              type="number"
-              min={1}
-              max={20}
-              value={billForm.split_count}
-              onChange={(event) =>
-                setBillForm((prev) => ({ ...prev, split_count: Math.max(1, Number(event.target.value) || 1) }))
-              }
-            />
-          </label>
-          <label className="full-row">
-            Adjustment reason
-            <input
-              value={billForm.adjustment_reason}
-              onChange={(event) =>
-                setBillForm((prev) => ({ ...prev, adjustment_reason: event.target.value }))
-              }
-              placeholder="Reason for discount/adjustment"
-            />
-          </label>
-        </div>
+            <label>
+              Promo code
+              <input
+                value={billForm.promotion_code}
+                onChange={(event) =>
+                  setBillForm((prev) => ({ ...prev, promotion_code: event.target.value }))
+                }
+                placeholder="HAPPY10"
+              />
+            </label>
+            <label>
+              Manual discount
+              <input
+                type="number"
+                min={0}
+                value={billForm.manual_discount_amount}
+                onChange={(event) =>
+                  setBillForm((prev) => ({
+                    ...prev,
+                    manual_discount_amount: Math.max(0, Number(event.target.value) || 0),
+                  }))
+                }
+              />
+            </label>
+            <label>
+              Service rate %
+              <input
+                type="number"
+                min={0}
+                max={50}
+                value={billForm.service_charge_rate}
+                onChange={(event) =>
+                  setBillForm((prev) => ({
+                    ...prev,
+                    service_charge_rate: Math.max(0, Number(event.target.value) || 0),
+                  }))
+                }
+              />
+            </label>
+            <label>
+              Tax rate %
+              <input
+                type="number"
+                min={0}
+                max={50}
+                value={billForm.tax_rate}
+                onChange={(event) =>
+                  setBillForm((prev) => ({
+                    ...prev,
+                    tax_rate: Math.max(0, Number(event.target.value) || 0),
+                  }))
+                }
+              />
+            </label>
+            <label>
+              Tip
+              <input
+                type="number"
+                min={0}
+                value={billForm.tip_amount}
+                onChange={(event) =>
+                  setBillForm((prev) => ({
+                    ...prev,
+                    tip_amount: Math.max(0, Number(event.target.value) || 0),
+                  }))
+                }
+              />
+            </label>
+            <label>
+              Split count
+              <input
+                type="number"
+                min={1}
+                max={20}
+                value={billForm.split_count}
+                onChange={(event) =>
+                  setBillForm((prev) => ({
+                    ...prev,
+                    split_count: Math.max(1, Number(event.target.value) || 1),
+                  }))
+                }
+              />
+            </label>
+            <label className="full-row">
+              Adjustment reason
+              <input
+                value={billForm.adjustment_reason}
+                onChange={(event) =>
+                  setBillForm((prev) => ({ ...prev, adjustment_reason: event.target.value }))
+                }
+                placeholder="Reason for discount/adjustment"
+              />
+            </label>
+          </div>
 
         <div className="manager-actions">
           <button
@@ -665,7 +705,7 @@ export const ManagerPage = () => {
           <button
             type="button"
             className="ghost-btn"
-            disabled={!canManageSensitiveBilling || !currentBill || busy === "adjust-bill"}
+            disabled={!canAdjustBill || !currentBill || busy === "adjust-bill"}
             onClick={adjustCurrentBill}
           >
             {busy === "adjust-bill" ? "Saving..." : "Apply adjustment"}
@@ -814,19 +854,29 @@ export const ManagerPage = () => {
             {selectedSessionId && selectedSessionStatus !== "awaiting_payment"
               ? " Bill can be opened after waiter clicks 'Moi thanh toan'."
               : ""}
+            {!selectedSessionId && isCashierView
+              ? " Select a table in 'awaiting payment' to continue checkout."
+              : ""}
           </p>
         )}
 
         {receipt ? (
           <pre className="receipt-box">{receipt.receipt_text}</pre>
         ) : null}
-      </section>
+        </section>
+      ) : null}
 
-      {canUseAdminTools ? (
+      {showAdmin && canUseAdminTools ? (
         <section className="panel manager-admin">
           <div className="panel-header">
             <h2>Administrative Tools</h2>
-            <span className="badge">RBAC + Menu + Promo + Audit</span>
+            <div className="manager-actions">
+              <nav className="role-nav">
+                <NavLink to="/manager/billing">Billing</NavLink>
+                <NavLink to="/manager/admin">Admin tools</NavLink>
+              </nav>
+              <span className="badge">RBAC + Menu + Promo + Audit</span>
+            </div>
           </div>
 
         <div className="admin-block">
@@ -1149,6 +1199,12 @@ export const ManagerPage = () => {
             ))}
           </div>
         </div>
+        </section>
+      ) : null}
+
+      {showAdmin && !canUseAdminTools ? (
+        <section className="panel">
+          <p className="muted">You do not have permission to view administrative tools.</p>
         </section>
       ) : null}
 

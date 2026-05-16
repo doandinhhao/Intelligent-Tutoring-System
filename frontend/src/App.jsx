@@ -6,15 +6,16 @@ import { KitchenPage } from "./pages/KitchenPage";
 import { LoginPage } from "./pages/LoginPage";
 import { ManagerPage } from "./pages/ManagerPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
-import { WaiterPage } from "./pages/WaiterPage";
+import { WaiterTableDetailPage } from "./pages/WaiterTableDetailPage";
+import { WaiterTablesPage } from "./pages/WaiterTablesPage";
 
 const roleRouteMap = {
-  chef: "/kitchen",
-  manager: "/manager",
-  admin: "/manager",
-  waiter: "/waiter",
-  cashier: "/manager",
-  host: "/manager",
+  chef: "/kitchen/queue",
+  manager: "/manager/billing",
+  admin: "/manager/billing",
+  waiter: "/waiter/tables",
+  cashier: "/cashier/checkout",
+  host: "/manager/billing",
 };
 
 const HomeRedirect = () => {
@@ -22,7 +23,7 @@ const HomeRedirect = () => {
   if (!isAuthenticated || !user) {
     return <Navigate to="/login" replace />;
   }
-  return <Navigate to={roleRouteMap[user.role_key] || "/waiter"} replace />;
+  return <Navigate to={roleRouteMap[user.role_key] || "/waiter/tables"} replace />;
 };
 
 function App() {
@@ -36,7 +37,29 @@ function App() {
         element={
           <ProtectedRoute roles={["waiter", "manager", "admin", "host"]}>
             <AppShell>
-              <WaiterPage />
+              <Navigate to="/waiter/tables" replace />
+            </AppShell>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/waiter/tables"
+        element={
+          <ProtectedRoute roles={["waiter", "manager", "admin", "host"]}>
+            <AppShell>
+              <WaiterTablesPage />
+            </AppShell>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/waiter/tables/:tableId"
+        element={
+          <ProtectedRoute roles={["waiter", "manager", "admin", "host"]}>
+            <AppShell>
+              <WaiterTableDetailPage />
             </AppShell>
           </ProtectedRoute>
         }
@@ -47,7 +70,29 @@ function App() {
         element={
           <ProtectedRoute roles={["chef", "manager", "admin"]}>
             <AppShell>
-              <KitchenPage />
+              <Navigate to="/kitchen/queue" replace />
+            </AppShell>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/kitchen/queue"
+        element={
+          <ProtectedRoute roles={["chef", "manager", "admin"]}>
+            <AppShell>
+              <KitchenPage view="queue" />
+            </AppShell>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/kitchen/changes"
+        element={
+          <ProtectedRoute roles={["chef", "manager", "admin"]}>
+            <AppShell>
+              <KitchenPage view="changes" />
             </AppShell>
           </ProtectedRoute>
         }
@@ -56,9 +101,53 @@ function App() {
       <Route
         path="/manager"
         element={
-          <ProtectedRoute roles={["manager", "admin", "cashier", "host"]}>
+          <ProtectedRoute roles={["manager", "admin", "host"]}>
             <AppShell>
-              <ManagerPage />
+              <Navigate to="/manager/billing" replace />
+            </AppShell>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/manager/billing"
+        element={
+          <ProtectedRoute roles={["manager", "admin", "host"]}>
+            <AppShell>
+              <ManagerPage view="billing" />
+            </AppShell>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/cashier"
+        element={
+          <ProtectedRoute roles={["cashier"]}>
+            <AppShell>
+              <Navigate to="/cashier/checkout" replace />
+            </AppShell>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/cashier/checkout"
+        element={
+          <ProtectedRoute roles={["cashier"]}>
+            <AppShell>
+              <ManagerPage view="billing" />
+            </AppShell>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/manager/admin"
+        element={
+          <ProtectedRoute roles={["manager", "admin"]}>
+            <AppShell>
+              <ManagerPage view="admin" />
             </AppShell>
           </ProtectedRoute>
         }

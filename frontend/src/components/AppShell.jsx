@@ -11,19 +11,19 @@ const roleTitleMap = {
 };
 
 const navItemsByRole = {
-  waiter: [{ to: "/waiter", label: "Waiter" }],
-  chef: [{ to: "/kitchen", label: "Kitchen" }],
-  cashier: [{ to: "/manager", label: "Manager" }],
-  host: [{ to: "/manager", label: "Manager" }],
+  waiter: [{ to: "/waiter/tables", label: "Waiter" }],
+  chef: [{ to: "/kitchen/queue", label: "Kitchen" }],
+  cashier: [{ to: "/cashier/checkout", label: "Cashier" }],
+  host: [{ to: "/manager/billing", label: "Manager" }],
   manager: [
-    { to: "/waiter", label: "Waiter" },
-    { to: "/kitchen", label: "Kitchen" },
-    { to: "/manager", label: "Manager" },
+    { to: "/waiter/tables", label: "Waiter" },
+    { to: "/kitchen/queue", label: "Kitchen" },
+    { to: "/manager/billing", label: "Manager" },
   ],
   admin: [
-    { to: "/waiter", label: "Waiter" },
-    { to: "/kitchen", label: "Kitchen" },
-    { to: "/manager", label: "Manager" },
+    { to: "/waiter/tables", label: "Waiter" },
+    { to: "/kitchen/queue", label: "Kitchen" },
+    { to: "/manager/billing", label: "Manager" },
   ],
 };
 

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { NavLink } from "react-router-dom";
 import { kitchenApi } from "../api/irmsApi";
 
 const columns = [
@@ -24,7 +25,7 @@ const formatDueTime = (value) => {
   return dueDate.toLocaleTimeString();
 };
 
-export const KitchenPage = () => {
+export const KitchenPage = ({ view = "all" }) => {
   const [items, setItems] = useState([]);
   const [changeRequests, setChangeRequests] = useState([]);
   const [reviewNotes, setReviewNotes] = useState({});
@@ -111,16 +112,26 @@ export const KitchenPage = () => {
     );
   }
 
+  const showQueue = view !== "changes";
+  const showChangeRequests = view !== "queue";
+
   return (
     <main className="kitchen-board">
       <header className="panel-header">
         <h2>Kitchen Display System</h2>
-        <button type="button" className="ghost-btn" onClick={() => refresh(true)}>
-          Refresh queue
-        </button>
+        <div className="manager-actions">
+          <nav className="role-nav">
+            <NavLink to="/kitchen/queue">Queue</NavLink>
+            <NavLink to="/kitchen/changes">Change requests</NavLink>
+          </nav>
+          <button type="button" className="ghost-btn" onClick={() => refresh(true)}>
+            Refresh queue
+          </button>
+        </div>
       </header>
 
-      <div className="kitchen-columns">
+      {showQueue ? (
+        <div className="kitchen-columns">
         {columns.map((column) => (
           <section key={column.key} className="kitchen-column">
             <div className="column-head">
@@ -178,9 +189,11 @@ export const KitchenPage = () => {
             ))}
           </section>
         ))}
-      </div>
+        </div>
+      ) : null}
 
-      <section className="panel">
+      {showChangeRequests ? (
+        <section className="panel">
         <div className="panel-header">
           <h3>Pending Change Requests</h3>
           <span className="badge">{changeRequests.length}</span>
@@ -244,7 +257,8 @@ export const KitchenPage = () => {
             </div>
           </article>
         ))}
-      </section>
+        </section>
+      ) : null}
 
       {error ? <p className="error-banner">{error}</p> : null}
     </main>

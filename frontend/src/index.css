@@ -358,6 +358,7 @@ button {
 
 .content-wrap {
   min-height: 0;
+  width: 100%;
 }
 
 .panel {
@@ -367,7 +368,13 @@ button {
   padding: 14px;
   display: grid;
   gap: 12px;
-  min-height: 420px;
+  min-height: 0;
+  min-width: 0;
+}
+
+.panel-compact {
+  min-height: 0;
+  padding: 12px 14px;
 }
 
 .panel-header {
@@ -381,6 +388,23 @@ button {
   display: grid;
   grid-template-columns: 1.05fr 1.4fr 1fr;
   gap: 14px;
+  align-items: start;
+}
+
+.grid-waiter.waiter-layout-tables {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.grid-waiter.waiter-layout-detail {
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+}
+
+.waiter-detail-toolbar {
+  grid-column: 1 / -1;
+}
+
+.waiter-error {
+  grid-column: 1 / -1;
 }
 
 .table-grid {
@@ -450,6 +474,7 @@ button {
   padding: 10px;
   display: grid;
   gap: 8px;
+  overflow: hidden;
 }
 
 .menu-card p {
@@ -771,10 +796,13 @@ button {
   display: grid;
   grid-template-columns: 1.2fr 1fr;
   gap: 14px;
+  width: 100%;
+  align-items: start;
 }
 
 .manager-grid-lite {
   grid-template-columns: 1fr;
+  width: 100%;
 }
 
 .manager-billing,
@@ -904,6 +932,10 @@ button {
 
 @media (max-width: 1280px) {
   .grid-waiter {
+    grid-template-columns: 1fr;
+  }
+
+  .grid-waiter.waiter-layout-detail {
     grid-template-columns: 1fr;
   }
 

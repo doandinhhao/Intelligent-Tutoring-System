@@ -1,11 +1,11 @@
 INSERT INTO users (user_id, username, full_name, password_hash, role_key, status_key, created_at)
 VALUES
-  (1, 'waiter01', 'Waiter One', '$2b$10$hc/gLHsR.6znw5MkVpaoX.TKdGvEIdiSkRgOZjle30CHKl1JFqT5G', 'waiter', 'active', NOW()),
-  (2, 'chef01', 'Chef One', '$2b$10$hc/gLHsR.6znw5MkVpaoX.TKdGvEIdiSkRgOZjle30CHKl1JFqT5G', 'chef', 'active', NOW()),
-  (3, 'manager01', 'Manager One', '$2b$10$hc/gLHsR.6znw5MkVpaoX.TKdGvEIdiSkRgOZjle30CHKl1JFqT5G', 'manager', 'active', NOW()),
-  (4, 'cashier01', 'Cashier One', '$2b$10$hc/gLHsR.6znw5MkVpaoX.TKdGvEIdiSkRgOZjle30CHKl1JFqT5G', 'cashier', 'active', NOW()),
-  (5, 'host01', 'Host One', '$2b$10$hc/gLHsR.6znw5MkVpaoX.TKdGvEIdiSkRgOZjle30CHKl1JFqT5G', 'host', 'active', NOW()),
-  (6, 'admin01', 'System Admin', '$2b$10$hc/gLHsR.6znw5MkVpaoX.TKdGvEIdiSkRgOZjle30CHKl1JFqT5G', 'admin', 'active', NOW())
+  (1, 'waiter01', 'Waiter One', '$2b$10$iiRLbIecG6QbNS4xTFVvI.awPUmyd3wASMnCJJB3f2fgP0O8yW6m2', 'waiter', 'active', NOW()),
+  (2, 'chef01', 'Chef One', '$2b$10$iiRLbIecG6QbNS4xTFVvI.awPUmyd3wASMnCJJB3f2fgP0O8yW6m2', 'chef', 'active', NOW()),
+  (3, 'manager01', 'Manager One', '$2b$10$iiRLbIecG6QbNS4xTFVvI.awPUmyd3wASMnCJJB3f2fgP0O8yW6m2', 'manager', 'active', NOW()),
+  (4, 'cashier01', 'Cashier One', '$2b$10$iiRLbIecG6QbNS4xTFVvI.awPUmyd3wASMnCJJB3f2fgP0O8yW6m2', 'cashier', 'active', NOW()),
+  (5, 'host01', 'Host One', '$2b$10$iiRLbIecG6QbNS4xTFVvI.awPUmyd3wASMnCJJB3f2fgP0O8yW6m2', 'host', 'active', NOW()),
+  (6, 'admin01', 'System Admin', '$2b$10$iiRLbIecG6QbNS4xTFVvI.awPUmyd3wASMnCJJB3f2fgP0O8yW6m2', 'admin', 'active', NOW())
 ON CONFLICT (user_id) DO NOTHING;
 
 INSERT INTO dining_tables (table_id, table_code, area_key, capacity, current_status_key, is_active)
